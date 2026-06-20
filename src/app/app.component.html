@@ -1,0 +1,144 @@
+@if (showNotification) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-emoji">🎉</div>
+      <h2 class="modal-title">Congratulations!</h2>
+      <p class="modal-msg">
+        You cracked the code in <strong>{{ history.length }}</strong>
+        {{ history.length === 1 ? 'try' : 'tries' }}!
+      </p>
+      <button class="btn-new-game modal-play-again" (click)="startNewGame()">Play Again</button>
+    </div>
+  </div>
+}
+
+<div class="game-wrap">
+  <header>
+    <h1>Color Mastermind</h1>
+    <p class="subtitle">Guess the secret 4-color code</p>
+  </header>
+
+  <div class="game-status">
+    @if (!gameOver) {
+      <span>Attempt <strong>{{ history.length + 1 }}</strong> of {{ MAX_TRIES }}</span>
+    } @else if (won) {
+      <span class="won">You cracked the code in {{ history.length }} {{ history.length === 1 ? 'try' : 'tries' }}!</span>
+    } @else {
+      <span class="lost">Out of tries! The secret was:</span>
+    }
+    @if (gameOver && !won) {
+      <div class="secret-row">
+        @for (c of secret; track $index) {
+          <div class="peg" [style.background]="c"></div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="board">
+    @for (row of history; track $index; let i = $index) {
+      <div class="row done">
+        <span class="row-n">{{ i + 1 }}</span>
+        <div class="pegs">
+          @for (c of row.colors; track $index) {
+            <div class="peg" [style.background]="c"></div>
+          }
+        </div>
+        <div class="fb-grid">
+          @for (type of feedbackPegs(row.hits, row.hints); track $index) {
+            <div [class]="'fb-peg ' + type"></div>
+          }
+        </div>
+        <div class="row-label">
+          @if (row.hits === CODE_LENGTH) {
+            <span class="label-perfect">Perfect!</span>
+          } @else {
+            <span class="label-hits">{{ row.hits }}H {{ row.hints }}C</span>
+          }
+        </div>
+      </div>
+    }
+
+    @if (!gameOver) {
+      <div class="row active">
+        <span class="row-n">{{ history.length + 1 }}</span>
+        <div class="pegs">
+          @for (slot of currentGuess; track $index; let i = $index) {
+            <div
+              class="peg peg-slot"
+              [class.empty-slot]="!slot"
+              [style.background]="slot ?? ''"
+              (click)="placeColor(i)"
+            ></div>
+          }
+        </div>
+        <div class="fb-grid placeholder">
+          @for (n of pegSlots; track n) {
+            <div class="fb-peg miss"></div>
+          }
+        </div>
+        <div class="row-label"></div>
+      </div>
+    }
+
+    @for (n of futureRows; track n) {
+      <div class="row future">
+        <span class="row-n">{{ n + 1 }}</span>
+        <div class="pegs">
+          @for (i of pegSlots; track i) {
+            <div class="peg empty-slot"></div>
+          }
+        </div>
+        <div class="fb-grid">
+          @for (i of pegSlots; track i) {
+            <div class="fb-peg miss"></div>
+          }
+        </div>
+        <div class="row-label"></div>
+      </div>
+    }
+  </div>
+
+  @if (!gameOver) {
+    <div class="palette-section">
+      <p class="palette-hint">
+        @if (selectedColor) {
+          <span>Click a slot to place your color</span>
+        } @else {
+          <span>Pick a color below</span>
+        }
+      </p>
+      <div class="color-row">
+        @for (c of COLORS; track c) {
+          <button
+            class="color-pick"
+            [class.active]="selectedColor === c"
+            [style.background]="c"
+            (click)="selectColor(c)"
+          ></button>
+        }
+      </div>
+      <div class="btn-row">
+        <button class="btn-submit" [disabled]="!canSubmit" (click)="submitGuess()">Submit Guess</button>
+        <button class="btn-clear" (click)="clearGuess()">Clear</button>
+      </div>
+    </div>
+  }
+
+  <button class="btn-new-game" (click)="startNewGame()">New Game</button>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="fb-peg hit"></div>
+      <span>Right color &amp; spot (Hit)</span>
+    </div>
+    <div class="legend-item">
+      <div class="fb-peg hint"></div>
+      <span>Right color, wrong spot (Close)</span>
+    </div>
+    <div class="legend-item">
+      <div class="fb-peg miss"></div>
+      <span>Not in code</span>
+    </div>
+  </div>
+</div>
