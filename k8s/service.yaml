@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: guessgame-service
+spec:
+  type: NodePort          # exposes the app on your local machine
+  selector:
+    app: guessgame        # routes traffic to pods with this label
+  ports:
+    - protocol: TCP
+      port: 80            # port inside the cluster
+      targetPort: 80      # port the container listens on
+      nodePort: 30080     # port you open in your browser: localhost:30080

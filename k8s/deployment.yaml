@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guessgame
+  labels:
+    app: guessgame
+spec:
+  replicas: 2                      # run 2 copies of the container
+  selector:
+    matchLabels:
+      app: guessgame
+  template:
+    metadata:
+      labels:
+        app: guessgame
+    spec:
+      containers:
+        - name: guessgame
+          image: osamaalkarmy/guessgame:latest
+          imagePullPolicy: Always  # always pull the latest image from Docker Hub
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
